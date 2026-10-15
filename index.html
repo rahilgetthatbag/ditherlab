@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ditherlab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2316171a'/%3E%3Cg fill='%23c4ee45'%3E%3Crect x='4' y='4' width='4' height='4'/%3E%3Crect x='12' y='4' width='4' height='4'/%3E%3Crect x='8' y='8' width='4' height='4'/%3E%3Crect x='16' y='8' width='4' height='4'/%3E%3Crect x='4' y='12' width='4' height='4'/%3E%3Crect x='12' y='12' width='4' height='4'/%3E%3Crect x='8' y='16' width='4' height='4'/%3E%3Crect x='16' y='16' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="app">
+
+  <!-- Left: preview -->
+  <section class="stage-col">
+    <div id="stage" class="stage" tabindex="0" aria-label="Preview. Drop an image here.">
+      <canvas id="out" hidden></canvas>
+      <div id="empty" class="empty">
+        <p><strong>Drop an image here</strong>, paste one from the clipboard, or choose a file.</p>
+        <button id="sample" class="btn">Try the sample image</button>
+      </div>
+    </div>
+    <div class="bar"><span id="info"></span><span id="status" role="status" aria-live="polite"></span></div>
+  </section>
+
+  <!-- Right: controls -->
+  <aside class="panel" aria-label="Controls">
+    <header class="brand">
+      <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#16171a"/><g fill="#c4ee45"><rect x="4" y="4" width="4" height="4"/><rect x="12" y="4" width="4" height="4"/><rect x="8" y="8" width="4" height="4"/><rect x="16" y="8" width="4" height="4"/><rect x="4" y="12" width="4" height="4"/><rect x="12" y="12" width="4" height="4"/><rect x="8" y="16" width="4" height="4"/><rect x="16" y="16" width="4" height="4"/></g></svg>
+      <h1>ditherlab</h1>
+    </header>
+    <p class="sub">Turn any image into ASCII, dither or halftone. Everything runs in your browser.</p>
+
+    <section>
+      <h2>Image</h2>
+      <input id="file" type="file" accept="image/*" aria-label="Choose an image file">
+    </section>
+
+    <section>
+      <h2>Mode</h2>
+      <div class="chips" id="modes" role="group" aria-label="Mode">
+        <button class="chip" data-mode="ascii" aria-pressed="false">ASCII</button>
+        <button class="chip" data-mode="dither" aria-pressed="true">Dither</button>
+        <button class="chip" data-mode="halftone" aria-pressed="false">Halftone</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Tone</h2>
+      <div class="row"><label for="brightness">Brightness</label><input class="ctl" id="brightness" type="range" min="-100" max="100" value="0"><output for="brightness">0</output></div>
+      <div class="row"><label for="contrast">Contrast</label><input class="ctl" id="contrast" type="range" min="-100" max="100" value="0"><output for="contrast">0</output></div>
+      <div class="row"><label for="gamma">Gamma</label><input class="ctl" id="gamma" type="range" min="0.3" max="3" step="0.05" value="1"><output for="gamma">1</output></div>
+      <div class="checks">
+        <label><input class="ctl" id="auto" type="checkbox"> Auto levels</label>
+        <label><input class="ctl" id="invert" type="checkbox"> Invert</label>
+      </div>
+    </section>
+
+    <!-- ASCII -->
+    <section data-mode="ascii" hidden>
+      <h2>ASCII</h2>
+      <div class="row"><label for="cols">Columns</label><input class="ctl" id="cols" type="range" min="20" max="300" value="110"><output for="cols">110</output></div>
+      <div class="row"><label for="ramp">Characters</label><select class="ctl" id="ramp">
+        <option value="standard">Standard  @%#*+=-:.</option>
+        <option value="detailed">Detailed (70 levels)</option>
+        <option value="blocks">Blocks  █▓▒░</option>
+        <option value="minimal">Minimal  #+-.</option>
+        <option value="binary">Binary  10</option>
+        <option value="custom">Custom…</option></select></div>
+      <div class="row" id="customRow" hidden><label for="customRamp">Custom ramp</label><input class="ctl" id="customRamp" type="text" value="@#:. " spellcheck="false" aria-describedby="customHelp"></div>
+      <p class="hint" id="customHelp" hidden>Type characters from densest to sparsest.</p>
+      <div class="row"><label for="alook">Look</label><select class="ctl" id="alook"></select></div>
+      <div class="row"><label for="afg">Text</label><input class="ctl" id="afg" type="color" value="#16171a"><label for="abg" class="inline">Background</label><input class="ctl" id="abg" type="color" value="#f1f0ec"></div>
+      <div class="checks"><label><input class="ctl" id="acolor" type="checkbox"> Use the image's colours</label></div>
+    </section>
+
+    <!-- Dither -->
+    <section data-mode="dither">
+      <h2>Dither</h2>
+      <div class="row"><label for="res">Resolution</label><input class="ctl" id="res" type="range" min="64" max="1200" step="8" value="480"><output for="res">480</output></div>
+      <div class="row"><label for="algo">Algorithm</label><select class="ctl" id="algo"></select></div>
+      <div class="row"><label for="space">Colour</label><select class="ctl" id="space">
+        <option value="tone">Palette (tones)</option>
+        <option value="colour">Full colour (levels per channel)</option></select></div>
+      <div class="row" id="palRow"><label for="pal">Palette</label><select class="ctl" id="pal"></select></div>
+      <div class="row" id="customPal" hidden><label for="pdark">Dark</label><input class="ctl" id="pdark" type="color" value="#16171a"><label for="plight" class="inline">Light</label><input class="ctl" id="plight" type="color" value="#f1f0ec"></div>
+      <div class="row" id="lvRow" hidden><label for="levels">Levels</label><input class="ctl" id="levels" type="range" min="2" max="8" value="2"><output for="levels">2</output></div>
+      <div class="checks"><label><input class="ctl" id="serp" type="checkbox" checked> Serpentine scan</label></div>
+    </section>
+
+    <!-- Halftone -->
+    <section data-mode="halftone" hidden>
+      <h2>Halftone</h2>
+      <div class="row"><label for="hres">Detail</label><input class="ctl" id="hres" type="range" min="200" max="1400" step="10" value="800"><output for="hres">800</output></div>
+      <div class="row"><label for="shape">Shape</label><select class="ctl" id="shape">
+        <option value="circle">Circles</option><option value="square">Squares</option><option value="line">Lines</option></select></div>
+      <div class="row"><label for="cell">Cell size</label><input class="ctl" id="cell" type="range" min="3" max="40" value="10"><output for="cell">10</output></div>
+      <div class="row"><label for="angle">Angle</label><input class="ctl" id="angle" type="range" min="0" max="90" value="45"><output for="angle">45</output></div>
+      <div class="row"><label for="gain">Dot gain</label><input class="ctl" id="gain" type="range" min="-50" max="50" value="0"><output for="gain">0</output></div>
+      <div class="row"><label for="hmode">Ink</label><select class="ctl" id="hmode">
+        <option value="mono">Single ink</option><option value="cmyk">CMYK (colour)</option></select></div>
+      <div id="monoRows">
+        <div class="row"><label for="hlook">Look</label><select class="ctl" id="hlook"></select></div>
+        <div class="row"><label for="hink">Ink</label><input class="ctl" id="hink" type="color" value="#16171a"><label for="hpaper" class="inline">Paper</label><input class="ctl" id="hpaper" type="color" value="#f1f0ec"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Export</h2>
+      <div class="row"><label for="scale">Scale</label><select id="scale">
+        <option value="1">1×</option><option value="2" selected>2×</option><option value="3">3×</option><option value="4">4×</option><option value="6">6×</option><option value="8">8×</option></select></div>
+      <div class="btns">
+        <button id="png" class="btn" disabled>Download PNG</button>
+        <button id="copy" class="btn ghost" data-mode="ascii" hidden disabled>Copy text</button>
+        <button id="txt" class="btn ghost" data-mode="ascii" hidden disabled>Download .txt</button>
+      </div>
+      <p class="hint">Dither exports are enlarged without smoothing, so pixels stay sharp. Halftone and ASCII are redrawn at the larger size.</p>
+    </section>
+  </aside>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/ascii.js"></script>
+<script src="js/dither.js"></script>
+<script src="js/halftone.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

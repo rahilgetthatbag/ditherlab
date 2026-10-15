@@ -1,0 +1,12 @@
+{
+  "name": "ditherlab",
+  "version": "1.0.0",
+  "description": "Turn any image into ASCII, dither or halftone in the browser.",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "build": "node tools/build.js",
+    "start": "python3 -m http.server 8000"
+  }
+}
